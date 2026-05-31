@@ -4,7 +4,8 @@ data class BalanceInfo(
     val balance: Double,
     val planName: String,
     val expiresAt: String,
-    val lastUpdate: Long = System.currentTimeMillis()
+    val lastUpdate: Long = System.currentTimeMillis(),
+    val usagesJson: String = "[]"
 ) {
     fun toJson(): String = com.google.gson.Gson().toJson(this)
 
@@ -19,7 +20,8 @@ data class BalanceInfo(
             balance = 0.0,
             planName = "Unknown",
             expiresAt = "N/A",
-            lastUpdate = 0L
+            lastUpdate = 0L,
+            usagesJson = "[]"
         )
     }
 }
