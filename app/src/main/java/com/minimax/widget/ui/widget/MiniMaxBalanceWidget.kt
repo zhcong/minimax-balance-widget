@@ -21,14 +21,14 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.width
 import androidx.glance.text.Text
+import androidx.glance.text.FontFamily
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.minimax.widget.config.ConfigActivity
 import com.minimax.widget.data.model.BalanceInfo
+import com.minimax.widget.config.RefreshActivity
 import com.minimax.widget.repository.MiniMaxRepository
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -85,13 +85,14 @@ private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
             .fillMaxSize()
             .background(ColorProvider(bg))
             .padding(horizontal = 14.dp, vertical = 10.dp)
-            .clickable(actionStartActivity<ConfigActivity>())
+            .clickable(actionStartActivity<RefreshActivity>())
     ) {
         Text(
             text = "$ minimax",
             style = TextStyle(
                 color = ColorProvider(blue),
-                fontSize = 13.sp
+                fontSize = 13.sp,
+                fontFamily = FontFamily.Monospace
             )
         )
 
@@ -105,7 +106,8 @@ private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
                         text = "$branch${usage.displayName}",
                         style = TextStyle(
                             color = ColorProvider(white),
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace
                         )
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
@@ -113,17 +115,20 @@ private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
                         text = "${usage.percentage}%",
                         style = TextStyle(
                             color = ColorProvider(blue),
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace
                         )
                     )
                 }
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    val filled = usage.percentage * 8 / 100
+                    val filled = if (usage.total > 0 && usage.used > 0)
+                        (usage.used * 8 / usage.total).coerceAtLeast(1) else 0
                     Text(
                         text = "│ ${"█".repeat(filled)}${"░".repeat(8 - filled)}",
                         style = TextStyle(
                             color = ColorProvider(blue),
-                            fontSize = 9.sp
+                            fontSize = 9.sp,
+                            fontFamily = FontFamily.Monospace
                         )
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
@@ -131,7 +136,8 @@ private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
                         text = "${usage.used}/${usage.total}",
                         style = TextStyle(
                             color = ColorProvider(gray),
-                            fontSize = 9.sp
+                            fontSize = 9.sp,
+                            fontFamily = FontFamily.Monospace
                         )
                     )
                 }
@@ -147,7 +153,8 @@ private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
             text = "$ _ reset $resetDisplay",
             style = TextStyle(
                 color = ColorProvider(gray),
-                fontSize = 9.sp
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace
             )
         )
     }

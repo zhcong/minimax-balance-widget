@@ -3,4 +3,10 @@
     <style name="Theme.MiniMaxBalanceWidget" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">#1A1A1A</item>
     </style>
+
+    <style name="Theme.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 </resources>
