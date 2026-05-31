@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#1A1A1A">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="$ configure --minimax"
+        android:textColor="#00FF00"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="MiniMax API Key"
+        hintTextColor="#888888">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/apiKeyInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:textColor="#00FF00"
+            android:fontFamily="monospace"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save &amp; Refresh"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#00FF00"
+        android:textColor="#000000"/>
+
+</LinearLayout>
