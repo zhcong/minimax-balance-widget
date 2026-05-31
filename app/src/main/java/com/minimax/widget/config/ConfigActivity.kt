@@ -34,12 +34,12 @@ class ConfigActivity : AppCompatActivity() {
 
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
 
-        repository.getApiKey()?.let { apiKey ->
-            binding.apiKeyInput.setText(apiKey)
+        // Auto-refresh on startup if API key exists
+        val existingKey = repository.getApiKey()
+        if (existingKey != null) {
+            binding.apiKeyInput.setText(existingKey)
+            fetchAndUpdateUI(existingKey)
         }
-
-        // Restore cached model checkboxes
-        restoreCheckboxesFromCache()
 
         binding.saveButton.setOnClickListener {
             val apiKey = binding.apiKeyInput.text.toString().trim()
@@ -172,11 +172,25 @@ class ConfigActivity : AppCompatActivity() {
     }
 
     private fun scheduleRefresh() {
-        val workRequest = androidx.work.PeriodicWorkRequestBuilder<RefreshWorker>(5, TimeUnit.MINUTES).build()
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiresCharging(false)
+            .build()
+        val workRequest = androidx.work.PeriodicWorkRequestBuilder<RefreshWorker>(
+            15, TimeUnit.MINUTES
+        ).setConstraints(constraints).build()
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             RefreshWorker.WORK_NAME,
             androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
+        )
+        // Also trigger immediate one-time refresh
+        val oneShot = androidx.work.OneTimeWorkRequestBuilder<RefreshWorker>()
+            .setConstraints(constraints)
+            .build()
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            "minimax_balance_refresh_immediate",
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            oneShot
         )
     }
 }

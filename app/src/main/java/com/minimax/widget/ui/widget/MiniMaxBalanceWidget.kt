@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.appwidget.GlanceAppWidget
@@ -25,6 +27,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.minimax.widget.config.ConfigActivity
 import com.minimax.widget.data.model.BalanceInfo
 import com.minimax.widget.repository.MiniMaxRepository
 import java.text.SimpleDateFormat
@@ -72,53 +75,55 @@ class MiniMaxBalanceWidget : GlanceAppWidget() {
 
 @Composable
 private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
-    val bg = Color(0xFF0D0D0D)
-    val green = Color(0xFF00FF41)
-    val gray = Color(0xFF556650)
-    val white = Color(0xFFCCDDCC)
+    val bg = Color(0xFF1A1E2E)
+    val blue = Color(0xFF5699FF)
+    val gray = Color(0xFF4A5A78)
+    val white = Color(0xFFC8D6E5)
 
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(ColorProvider(bg))
-            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .clickable(actionStartActivity<ConfigActivity>())
     ) {
         Text(
             text = "$ minimax",
             style = TextStyle(
-                color = ColorProvider(green),
-                fontSize = 10.sp
+                color = ColorProvider(blue),
+                fontSize = 13.sp
             )
         )
 
-        Spacer(modifier = GlanceModifier.height(3.dp))
+        Spacer(modifier = GlanceModifier.height(4.dp))
 
-        usages.forEach { usage ->
+        usages.forEachIndexed { i, usage ->
+            val branch = if (i == usages.lastIndex) "└─ " else "├─ "
             Column(modifier = GlanceModifier.fillMaxWidth()) {
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     Text(
-                        text = "  ${usage.displayName}",
+                        text = "$branch${usage.displayName}",
                         style = TextStyle(
                             color = ColorProvider(white),
-                            fontSize = 9.sp
+                            fontSize = 12.sp
                         )
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
                     Text(
                         text = "${usage.percentage}%",
                         style = TextStyle(
-                            color = ColorProvider(green),
-                            fontSize = 9.sp
+                            color = ColorProvider(blue),
+                            fontSize = 12.sp
                         )
                     )
                 }
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    val filled = usage.percentage * 16 / 100
+                    val filled = usage.percentage * 8 / 100
                     Text(
-                        text = "  ${"█".repeat(filled)}${"░".repeat(16 - filled)}",
+                        text = "│ ${"█".repeat(filled)}${"░".repeat(8 - filled)}",
                         style = TextStyle(
-                            color = ColorProvider(green),
-                            fontSize = 7.sp
+                            color = ColorProvider(blue),
+                            fontSize = 9.sp
                         )
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
@@ -126,19 +131,23 @@ private fun BalanceContent(balance: BalanceInfo, usages: List<ModelUsage>) {
                         text = "${usage.used}/${usage.total}",
                         style = TextStyle(
                             color = ColorProvider(gray),
-                            fontSize = 7.sp
+                            fontSize = 9.sp
                         )
                     )
                 }
             }
-            Spacer(modifier = GlanceModifier.height(3.dp))
         }
 
+        Spacer(modifier = GlanceModifier.height(1.dp))
+
+        val resetDisplay = usages.firstOrNull()?.resetTime
+            ?: SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(balance.lastUpdate))
+
         Text(
-            text = "$ _ ${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(balance.lastUpdate))}",
+            text = "$ _ reset $resetDisplay",
             style = TextStyle(
                 color = ColorProvider(gray),
-                fontSize = 7.sp
+                fontSize = 9.sp
             )
         )
     }

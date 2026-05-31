@@ -81,24 +81,24 @@ class MiniMaxRepository(private val context: Context) {
             val usages = mutableListOf<ModelUsage>()
 
             val displayNames = mapOf(
-                "MiniMax-M*" to "M2.7 模型",
-                "speech-hd" to "高清语音",
-                "music-2.5" to "音乐生成 2.5",
-                "music-2.6" to "音乐生成 2.6",
+                "MiniMax-M*" to "文本生成",
+                "speech-hd" to "语音",
+                "music-2.5" to "音乐 2.5",
+                "music-2.6" to "音乐生成",
                 "music-cover" to "音乐翻唱",
                 "lyrics_generation" to "歌词生成",
                 "image-01" to "图像生成",
                 "MiniMax-Hailuo-2.3-Fast-6s-768p" to "海螺视频 Fast",
                 "MiniMax-Hailuo-2.3-6s-768p" to "海螺视频 2.3",
-                "coding-plan-vlm" to "视觉理解",
-                "coding-plan-search" to "搜索增强"
+                "coding-plan-vlm" to "图片理解 MCP",
+                "coding-plan-search" to "网络搜索 MCP"
             )
 
             modelRemains?.forEach { model ->
                 val modelName = model.asJsonObject.get("model_name")?.asString ?: ""
-                val total = model.asJsonObject.get("current_weekly_total_count")?.asInt ?: 0
-                val used = model.asJsonObject.get("current_weekly_usage_count")?.asInt ?: 0
-                val resetTimestamp = model.asJsonObject.get("weekly_end_time")?.asLong ?: 0L
+                val total = model.asJsonObject.get("current_interval_total_count")?.asInt ?: 0
+                val used = model.asJsonObject.get("current_interval_usage_count")?.asInt ?: 0
+                val resetTimestamp = model.asJsonObject.get("end_time")?.asLong ?: 0L
 
                 val resetTime = if (resetTimestamp > 0) {
                     val resetDate = java.util.Date(resetTimestamp)
