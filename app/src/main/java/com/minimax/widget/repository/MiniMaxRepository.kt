@@ -64,8 +64,6 @@ class MiniMaxRepository(private val context: Context) {
             val response = client.newCall(request).execute()
             val body = response.body?.string() ?: return Result.failure(IllegalStateException("Empty response"))
 
-            android.util.Log.d("MiniMaxAPI", "Response: $body")
-
             val json = com.google.gson.JsonParser.parseString(body).asJsonObject
 
             val baseResp = json.getAsJsonObject("base_resp")
