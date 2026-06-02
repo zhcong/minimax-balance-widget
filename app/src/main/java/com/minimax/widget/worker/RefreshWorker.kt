@@ -22,7 +22,7 @@ class RefreshWorker(
             val result = repository.fetchBalance()
             result.onSuccess { balanceResult ->
                 val balance = com.minimax.widget.data.model.BalanceInfo(
-                    balance = balanceResult.usages.sumOf { it.remaining }.toDouble(),
+                    balance = 0.0,
                     planName = "MiniMax Code Plan",
                     expiresAt = "",
                     lastUpdate = balanceResult.lastUpdate,

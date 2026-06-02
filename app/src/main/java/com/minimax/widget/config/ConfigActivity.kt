@@ -84,7 +84,7 @@ class ConfigActivity : AppCompatActivity() {
                     val balanceResult = result.getOrNull()
                     if (balanceResult != null) {
                         val balance = com.minimax.widget.data.model.BalanceInfo(
-                            balance = balanceResult.usages.sumOf { it.remaining }.toDouble(),
+                            balance = 0.0,
                             planName = "MiniMax Code Plan",
                             expiresAt = "",
                             lastUpdate = balanceResult.lastUpdate,
@@ -95,8 +95,11 @@ class ConfigActivity : AppCompatActivity() {
                         val msg = buildString {
                             append("✓ Fetched:\n")
                             balanceResult.usages.forEach { u ->
-                                if (u.hasQuota) {
-                                    append("  ${u.displayName}: ${u.used}/${u.total}\n")
+                                if (u.hasIntervalQuota || u.hasWeeklyQuota) {
+                                    val parts = mutableListOf<String>()
+                                    if (u.hasIntervalQuota) parts.add("5h ${u.intervalUsed}/${u.intervalTotal}")
+                                    if (u.hasWeeklyQuota) parts.add("wk ${u.weeklyUsed}/${u.weeklyTotal}")
+                                    append("  ${u.displayName}: ${parts.joinToString("  ")}\n")
                                 }
                             }
                         }
@@ -135,8 +138,13 @@ class ConfigActivity : AppCompatActivity() {
         binding.modelCheckboxContainer.removeAllViews()
 
         usages.forEach { usage ->
+            val parts = mutableListOf<String>()
+            if (usage.hasIntervalQuota) parts.add("5h ${usage.intervalUsed}/${usage.intervalTotal}")
+            if (usage.hasWeeklyQuota) parts.add("wk ${usage.weeklyUsed}/${usage.weeklyTotal}")
+            val info = if (parts.isEmpty()) "" else " (${parts.joinToString(", ")})"
+
             val cb = com.google.android.material.checkbox.MaterialCheckBox(this).apply {
-                text = "${usage.displayName} (${usage.used}/${usage.total})"
+                text = "${usage.displayName}$info"
                 setTextColor(android.graphics.Color.parseColor("#CCDDCC"))
                 textSize = 14f
                 isChecked = selectedModels.isEmpty() || selectedModels.contains(usage.name)

@@ -6,6 +6,9 @@ import androidx.security.crypto.MasterKey
 import com.minimax.widget.data.model.BalanceInfo
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class MiniMaxRepository(private val context: Context) {
@@ -36,13 +39,20 @@ class MiniMaxRepository(private val context: Context) {
     data class ModelUsage(
         val name: String,
         val displayName: String,
-        val used: Int,
-        val total: Int,
-        val resetTime: String
+        val intervalUsed: Int,
+        val intervalTotal: Int,
+        val weeklyUsed: Int,
+        val weeklyTotal: Int,
+        val resetTime: String,
+        val intervalRemainingPercent: Int,
+        val weeklyRemainingPercent: Int
     ) {
-        val remaining: Int get() = if (total > 0) total - used else 0
-        val percentage: Int get() = if (total > 0) (used * 100 / total) else 0
-        val hasQuota: Boolean get() = total > 0
+        val intervalPercentage: Int
+            get() = if (intervalTotal > 0) (intervalUsed * 100 / intervalTotal) else 0
+        val weeklyPercentage: Int
+            get() = if (weeklyTotal > 0) (weeklyUsed * 100 / weeklyTotal) else 0
+        val hasIntervalQuota: Boolean get() = intervalTotal > 0
+        val hasWeeklyQuota: Boolean get() = weeklyTotal > 0
     }
 
     data class BalanceResult(
@@ -55,7 +65,7 @@ class MiniMaxRepository(private val context: Context) {
             val apiKey = getApiKey() ?: return Result.failure(IllegalStateException("API Key not configured"))
 
             val request = Request.Builder()
-                .url("https://www.minimaxi.com/v1/token_plan/remains")
+                .url("https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains")
                 .get()
                 .addHeader("Authorization", "Bearer $apiKey")
                 .addHeader("Content-Type", "application/json")
@@ -79,29 +89,26 @@ class MiniMaxRepository(private val context: Context) {
             val usages = mutableListOf<ModelUsage>()
 
             val displayNames = mapOf(
-                "MiniMax-M*" to "文本生成",
-                "speech-hd" to "语音",
-                "music-2.5" to "音乐 2.5",
-                "music-2.6" to "音乐生成",
-                "music-cover" to "音乐翻唱",
-                "lyrics_generation" to "歌词生成",
-                "image-01" to "图像生成",
-                "MiniMax-Hailuo-2.3-Fast-6s-768p" to "海螺视频 Fast",
-                "MiniMax-Hailuo-2.3-6s-768p" to "海螺视频 2.3",
-                "coding-plan-vlm" to "图片理解 MCP",
-                "coding-plan-search" to "网络搜索 MCP"
+                "general" to "通用",
+                "video" to "视频"
             )
 
             modelRemains?.forEach { model ->
-                val modelName = model.asJsonObject.get("model_name")?.asString ?: ""
-                val total = model.asJsonObject.get("current_interval_total_count")?.asInt ?: 0
-                val used = model.asJsonObject.get("current_interval_usage_count")?.asInt ?: 0
-                val resetTimestamp = model.asJsonObject.get("end_time")?.asLong ?: 0L
+                val obj = model.asJsonObject
+                val modelName = obj.get("model_name")?.asString ?: ""
 
+                val intervalTotal = obj.get("current_interval_total_count")?.asInt ?: 0
+                val intervalUsed = obj.get("current_interval_usage_count")?.asInt ?: 0
+                val intervalRemainingPercent = obj.get("current_interval_remaining_percent")?.asInt ?: 100
+
+                val weeklyTotal = obj.get("current_weekly_total_count")?.asInt ?: 0
+                val weeklyUsed = obj.get("current_weekly_usage_count")?.asInt ?: 0
+                val weeklyRemainingPercent = obj.get("current_weekly_remaining_percent")?.asInt ?: 100
+
+                val resetTimestamp = obj.get("end_time")?.asLong ?: 0L
                 val resetTime = if (resetTimestamp > 0) {
-                    val resetDate = java.util.Date(resetTimestamp)
-                    val fmt = java.text.SimpleDateFormat("MM-dd HH:mm", java.util.Locale.getDefault())
-                    fmt.format(resetDate)
+                    val fmt = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
+                    fmt.format(Date(resetTimestamp))
                 } else {
                     "-"
                 }
@@ -109,9 +116,13 @@ class MiniMaxRepository(private val context: Context) {
                 usages.add(ModelUsage(
                     name = modelName,
                     displayName = displayNames[modelName] ?: modelName,
-                    used = used,
-                    total = total,
-                    resetTime = resetTime
+                    intervalUsed = intervalUsed,
+                    intervalTotal = intervalTotal,
+                    weeklyUsed = weeklyUsed,
+                    weeklyTotal = weeklyTotal,
+                    resetTime = resetTime,
+                    intervalRemainingPercent = intervalRemainingPercent,
+                    weeklyRemainingPercent = weeklyRemainingPercent
                 ))
             }
 
